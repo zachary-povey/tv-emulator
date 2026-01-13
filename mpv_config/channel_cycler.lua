@@ -178,6 +178,11 @@ mp.add_key_binding(nil, "channel-next", function() cycle_channel(1) end)
 mp.add_key_binding(nil, "channel-prev", function() cycle_channel(-1) end)
 mp.add_key_binding(nil, "channel-refresh", scan_playlists)
 
+-- Save position on shutdown
+mp.register_event("shutdown", function()
+    save_current_state()
+end)
+
 -- Optional: Auto-start first channel
 if #playlists > 0 then
     cycle_channel(1)
