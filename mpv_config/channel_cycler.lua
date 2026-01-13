@@ -4,6 +4,7 @@ local msg = require 'mp.msg'
 -- CONFIGURATION
 local base_path = utils.join_path(os.getenv("HOME"), "Channels")
 local playlist_filename = "playlist.m3u"
+local history_file = utils.join_path(mp.find_config_file("."), "channel_history.json")
 
 -- STATE
 local playlists = {}
@@ -11,13 +12,59 @@ local current_index = 0
 
 -- HISTORY TRACKING
 -- Stores { index = 0, time = 10.5 } for each playlist path
-local channel_history = {} 
+local channel_history = {}
 -- Holds the target state we want to restore after the new playlist loads
 local pending_restore = nil 
 
 function file_exists(path)
     local info = utils.file_info(path)
     return info and info.is_file
+end
+
+function load_history()
+    if not file_exists(history_file) then
+        msg.info("No history file found, starting fresh")
+        return
+    end
+
+    local file = io.open(history_file, "r")
+    if not file then
+        msg.warn("Could not open history file: " .. history_file)
+        return
+    end
+
+    local content = file:read("*all")
+    file:close()
+
+    if not content or content == "" then
+        msg.warn("History file is empty")
+        return
+    end
+
+    local success, data = pcall(utils.parse_json, content)
+    if success and data then
+        channel_history = data
+        msg.info("Loaded channel history from: " .. history_file)
+    else
+        msg.warn("Could not parse history file, starting fresh")
+    end
+end
+
+function save_history()
+    local json = utils.format_json(channel_history)
+    if not json then
+        msg.warn("Could not serialize history to JSON")
+        return
+    end
+
+    local file = io.open(history_file, "w")
+    if not file then
+        msg.warn("Could not open history file for writing: " .. history_file)
+        return
+    end
+
+    file:write(json)
+    file:close()
 end
 
 function scan_playlists()
@@ -44,7 +91,7 @@ end
 
 function save_current_state()
     if current_index == 0 or #playlists == 0 then return end
-    
+
     local current_path = playlists[current_index]
     -- Get current file index (0-based) and time position
     local pos = mp.get_property_number("playlist-pos")
@@ -53,6 +100,7 @@ function save_current_state()
     -- Only save if we have valid data (time is sometimes nil at strict start/end)
     if current_path and pos and time then
         channel_history[current_path] = { index = pos, time = time }
+        save_history()
     end
 end
 
@@ -122,6 +170,7 @@ mp.register_event("file-loaded", function()
 end)
 
 -- Initialize
+load_history()
 scan_playlists()
 
 -- Bindings
