@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=Default Brightness and Volume
-Exec=mpv --idle --force-window --fs                
+Exec=sh -c "brightnessctl s 50%% && wpctl set-mute @DEFAULT_AUDIO_SINK@ 0 && wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.5"              
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
