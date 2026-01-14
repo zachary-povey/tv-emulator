@@ -4,9 +4,13 @@ Description=Disable Touchscreen on Boot
 [Service]
 Type=oneshot
 # Disable Touchscreen (eGalax)
-ExecStart=/bin/sh -c 'echo "1-5:1.0" > /sys/bus/usb/drivers/usbhid/unbind'
+ExecStart=/bin/sh -c 'echo "1-5:1.0" > /sys/bus/usb/drivers/usbhid/unbind || true'
 # Disable Stylus (Wacom)
-ExecStart=/bin/sh -c 'echo "1-4:1.0" > /sys/bus/usb/drivers/usbhid/unbind'
+ExecStart=/bin/sh -c 'echo "1-4:1.0" > /sys/bus/usb/drivers/usbhid/unbind || true'
+# Set brightness to 25%
+ExecStart=/bin/sh -c 'brightnessctl s 50%'
+# Set volume to 50%
+ExecStart=/bin/sh -c 'wpctl set-mute @DEFAULT_AUDIO_SINK@ 0 && wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.5'
 
 [Install]
 WantedBy=multi-user.target

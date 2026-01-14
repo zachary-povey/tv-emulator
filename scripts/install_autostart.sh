@@ -23,9 +23,6 @@ ssh $SSH_HOST "mkdir -p ${destination_dir}/.config/autostart"
 scp "${misc_dir}/mpv-autostart.desktop" "${SSH_HOST}:${destination_dir}/.config/autostart/mpv-autostart.desktop"
 echo -e "${GREEN}✅ mpv-autostart.desktop installed\n${NC}"
 
-scp "${misc_dir}/default-brightness-autostart.desktop" "${SSH_HOST}:${destination_dir}/.config/autostart/default-brightness-autostart.desktop"
-echo -e "${GREEN}✅ default-brightness-autostart.desktop installed\n${NC}"
-
 # Install GDM custom.conf (requires sudo)
 scp "${misc_dir}/custom.conf" "${SSH_HOST}:/tmp/custom.conf" >/dev/null
 
