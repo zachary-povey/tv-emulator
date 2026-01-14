@@ -32,9 +32,6 @@ destination_dir="/home/${SSH_USER}"
 scp "${button_daemon_dir}/multi_button.py" "${SSH_HOST}:${destination_dir}/multi_button.py" >/dev/null
 echo -e "${GREEN}✅ multi_button.py installed\n${NC}"
 
-scp "${button_daemon_dir}/multi_button_config.py" "${SSH_HOST}:${destination_dir}/multi_button_config.py" >/dev/null
-echo -e "${GREEN}✅ multi_button_config.py installed\n${NC}"
-
 # Make the main script executable
 ssh $SSH_HOST "chmod +x ${destination_dir}/multi_button.py"
 

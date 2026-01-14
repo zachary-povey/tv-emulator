@@ -178,8 +178,17 @@ mp.add_key_binding(nil, "channel-next", function() cycle_channel(1) end)
 mp.add_key_binding(nil, "channel-prev", function() cycle_channel(-1) end)
 mp.add_key_binding(nil, "channel-refresh", scan_playlists)
 
--- Save position on shutdown
+-- Save position periodically (every 10 seconds) to ensure it's captured
+mp.add_periodic_timer(10, function()
+    save_current_state()
+end)
+
+-- Also try to save on various exit-related events
 mp.register_event("shutdown", function()
+    save_current_state()
+end)
+
+mp.register_event("end-file", function()
     save_current_state()
 end)
 

@@ -19,6 +19,10 @@ mpv_config_dir="${SCRIPT_DIR}/../mpv_config"
 scp "${mpv_config_dir}/channel_cycler.lua" "${SSH_HOST}:~/.config/mpv/scripts/channel_cycler.lua"
 echo -e "${GREEN}✅ channel_cycler.lua installed\n${NC}"
 
+# Install mpv config
+scp "${mpv_config_dir}/mpv.conf" "${SSH_HOST}:~/.config/mpv/mpv.conf"
+echo -e "${GREEN}✅ mpv input config installed\n${NC}"
+
 # Install mpv input config
 scp "${mpv_config_dir}/mpv_input.conf" "${SSH_HOST}:~/.config/mpv/input.conf"
 echo -e "${GREEN}✅ mpv input config installed\n${NC}"
