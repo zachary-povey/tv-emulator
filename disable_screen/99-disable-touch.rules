@@ -1,1 +1,0 @@
-SUBSYSTEM=="input", ATTRS{idVendor}=="0eef", ATTRS{idProduct}=="c08f", ENV{LIBINPUT_IGNORE_DEVICE}="1"
