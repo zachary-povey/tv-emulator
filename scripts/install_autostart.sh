@@ -14,12 +14,13 @@ SSH_USER=tv-emulator
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
 misc_dir="${SCRIPT_DIR}/../misc"
+destination_dir="/home/${SSH_USER}"
 
 # Ensure autostart directory exists
-ssh $SSH_HOST "mkdir -p ~/.config/autostart"
+ssh $SSH_HOST "mkdir -p ${destination_dir}/.config/autostart"
 
 # Install mpv-autostart.desktop to user autostart directory
-scp "${misc_dir}/mpv-autostart.desktop" "${SSH_HOST}:~/.config/autostart/mpv-autostart.desktop"
+scp "${misc_dir}/mpv-autostart.desktop" "${SSH_HOST}:${destination_dir}/.config/autostart/mpv-autostart.desktop"
 echo -e "${GREEN}✅ mpv-autostart.desktop installed\n${NC}"
 
 # Install GDM custom.conf (requires sudo)
