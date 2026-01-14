@@ -1,0 +1,9 @@
+[Unit]
+Description=Disable Touchscreen on Boot
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh -c 'echo "1-5:1.0" > /sys/bus/usb/drivers/usbhid/unbind'
+
+[Install]
+WantedBy=multi-user.target
