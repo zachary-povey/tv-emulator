@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Default Volume
+Exec=sh -c "wpctl set-mute @DEFAULT_AUDIO_SINK@ 0 && wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.5"
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true

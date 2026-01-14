@@ -21,7 +21,11 @@ ssh $SSH_HOST "mkdir -p ${destination_dir}/.config/autostart"
 
 # Install mpv-autostart.desktop to user autostart directory
 scp "${misc_dir}/mpv-autostart.desktop" "${SSH_HOST}:${destination_dir}/.config/autostart/mpv-autostart.desktop"
-echo -e "${GREEN}✅ mpv-autostart.desktop installed\n${NC}"
+echo -e "${GREEN}✅ mpv-autostart.desktop installed${NC}"
+
+# Install default-volume-autostart.desktop to user autostart directory
+scp "${misc_dir}/default-volume-autostart.desktop" "${SSH_HOST}:${destination_dir}/.config/autostart/default-volume-autostart.desktop"
+echo -e "${GREEN}✅ default-volume-autostart.desktop installed${NC}"
 
 # Install GDM custom.conf (requires sudo)
 scp "${misc_dir}/custom.conf" "${SSH_HOST}:/tmp/custom.conf" >/dev/null
