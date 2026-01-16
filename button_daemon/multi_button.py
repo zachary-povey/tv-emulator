@@ -20,8 +20,8 @@ from evdev import UInput, ecodes
 import subprocess
 
 # Default configuration
-SHORT_PRESS_KEY = ecodes.KEY_F11
-MEDIUM_PRESS_KEY = ecodes.KEY_F12
+SHORT_PRESS_KEY = ecodes.KEY_F12
+MEDIUM_PRESS_KEY = ecodes.KEY_F11
 LONG_PRESS_KEY = ecodes.KEY_MUTE
 
 SHORT_PRESS_TIME = 0.5  # Under this = short press

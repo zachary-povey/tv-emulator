@@ -45,6 +45,14 @@ ssh -t $SSH_HOST "sudo mv /tmp/panasonic-multibutton.service /etc/systemd/system
 
 echo -e "${GREEN}✅ systemd service installed, enabled and started\n${NC}"
 
+# Copy logind.conf to disable default power button handling
+scp "${button_daemon_dir}/logind.conf" "${SSH_HOST}:/tmp/logind.conf" >/dev/null
+
+ssh -t $SSH_HOST "sudo mv /tmp/logind.conf /etc/systemd/logind.conf && \
+  sudo systemctl restart systemd-logind"
+
+echo -e "${GREEN}✅ logind.conf installed (power button handling disabled)\n${NC}"
+
 # Show service status
 echo -e "${YELLOW}Service status:${NC}"
 ssh -t $SSH_HOST "sudo systemctl status panasonic-multibutton.service --no-pager" || true
