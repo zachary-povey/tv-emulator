@@ -4,6 +4,7 @@ local msg = require 'mp.msg'
 -- CONFIGURATION
 local base_path = utils.join_path(os.getenv("HOME"), "Channels")
 local playlist_filename = "playlist.m3u"
+local settings_filename = "settings.json"
 local history_file = utils.join_path(mp.find_config_file("."), "channel_history.json")
 
 -- STATE
@@ -19,6 +20,38 @@ local pending_restore = nil
 function file_exists(path)
     local info = utils.file_info(path)
     return info and info.is_file
+end
+
+function load_channel_settings(playlist_path)
+    local channel_dir = playlist_path:match("(.+)/" .. playlist_filename .. "$")
+    if not channel_dir then return nil end
+
+    local settings_path = utils.join_path(channel_dir, settings_filename)
+    if not file_exists(settings_path) then return nil end
+
+    local file = io.open(settings_path, "r")
+    if not file then return nil end
+
+    local content = file:read("*all")
+    file:close()
+
+    local success, data = pcall(utils.parse_json, content)
+    if success and data then
+        msg.info("Loaded settings for channel: " .. channel_dir)
+        return data
+    end
+
+    msg.warn("Could not parse settings file: " .. settings_path)
+    return nil
+end
+
+function apply_channel_settings(settings)
+    if not settings then return end
+
+    if settings.volume ~= nil then
+        mp.set_property_number("volume", settings.volume)
+        msg.info("Set volume to: " .. settings.volume)
+    end
 end
 
 function load_history()
@@ -127,7 +160,11 @@ function cycle_channel(direction)
 
     -- 4. Load the new playlist
     mp.commandv("loadfile", next_path, "replace")
-    
+
+    -- 5. Apply channel-specific settings (e.g., volume)
+    local settings = load_channel_settings(next_path)
+    apply_channel_settings(settings)
+
     -- Display OSD
     local parent_dir = next_path:match("([^/]+)/" .. playlist_filename .. "$")
     mp.osd_message("Channel: " .. (parent_dir or "Unknown"))
