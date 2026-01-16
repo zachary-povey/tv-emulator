@@ -14,3 +14,7 @@
 # had to set intel_idle.max_cstate=1 in grub linux default (c state bug in processor)
 
 # install brightnessctl
+
+
+# install nordvpn and enable lan discovery
+# nordvpn set lan-discovery on
