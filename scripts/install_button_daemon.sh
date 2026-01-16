@@ -48,8 +48,11 @@ echo -e "${GREEN}✅ systemd service installed, enabled and started\n${NC}"
 # Copy logind.conf to disable default power button handling
 scp "${button_daemon_dir}/logind.conf" "${SSH_HOST}:/tmp/logind.conf" >/dev/null
 
+
 ssh -t $SSH_HOST "sudo mv /tmp/logind.conf /etc/systemd/logind.conf && \
   sudo systemctl restart systemd-logind"
+# make double sure power button does nothing
+gsettings set org.gnome.settings-daemon.plugins.power power-button-action 'nothing'
 
 echo -e "${GREEN}✅ logind.conf installed (power button handling disabled)\n${NC}"
 
