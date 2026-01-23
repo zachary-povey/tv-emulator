@@ -1,1 +1,5 @@
-SUBSYSTEM=="input", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="1025", ENV{ID_INPUT_KEYBOARD}="1", ENV{ID_INPUT}="1"
+# Interface 02 is the Keyboard: Force it to be a keyboard, forbid mouse.
+SUBSYSTEM=="input", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="1025", ATTRS{bInterfaceNumber}=="02", ENV{ID_INPUT_KEYBOARD}="1", ENV{ID_INPUT_MOUSE}="0"
+
+# Interface 03 is the Mouse: COMPLETELY IGNORE IT.
+SUBSYSTEM=="usb", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="1025", ATTR{bInterfaceNumber}=="03", ATTR{authorized}="0"
