@@ -1,0 +1,1 @@
+SUBSYSTEM=="input", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="1025", ENV{ID_INPUT_KEYBOARD}="1", ENV{ID_INPUT}="1"

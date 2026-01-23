@@ -1,0 +1,6 @@
+
+# Match by USB ID (b=Bus, v=Vendor, p=Product). 
+# The '*' matches any version/interface.
+evdev:input:b*v1915p1025*
+ KEYBOARD_KEY_c00e9=0
+ KEYBOARD_KEY_c00ea=9

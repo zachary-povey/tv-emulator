@@ -21,8 +21,16 @@ echo -e "${GREEN}✅ channel_cycler.lua installed\n${NC}"
 
 # Install mpv config
 scp "${mpv_config_dir}/mpv.conf" "${SSH_HOST}:~/.config/mpv/mpv.conf"
-echo -e "${GREEN}✅ mpv input config installed\n${NC}"
+echo -e "${GREEN}✅ mpv config installed\n${NC}"
 
 # Install mpv input config
 scp "${mpv_config_dir}/mpv_input.conf" "${SSH_HOST}:~/.config/mpv/input.conf"
 echo -e "${GREEN}✅ mpv input config installed\n${NC}"
+
+# Ensure remote is seen as a keyboard
+scp "${mpv_config_dir}/99-remote-input.rules" "${SSH_HOST}:/tmp/99-remote-input.rules"
+ssh -t $SSH_HOST "sudo mv /tmp/99-remote-input.rules /etc/udev/rules.d/99-remote-input.rules && sudo udevadm control --reload-rules"
+
+# Unbind volume keys, allowing mpv to pick them up and keep volume control there
+scp "${mpv_config_dir}/90-remote.hwdb" "${SSH_HOST}:/tmp/90-remote.hwdb"
+ssh -t $SSH_HOST "sudo mv /tmp/90-remote.hwdb /etc/udev/hwdb.d/90-remote.hwdb && sudo systemd-hwdb update && sudo udevadm trigger"
