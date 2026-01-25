@@ -44,6 +44,10 @@ scp "${misc_dir}/custom.conf" "${SSH_HOST}:/tmp/custom.conf" >/dev/null
 ssh -t $SSH_HOST "sudo mv /tmp/custom.conf /etc/gdm3/custom.conf"
 echo -e "${GREEN}✅ GDM custom.conf installed (automatic login to cage-mpv session)${NC}"
 
+# Set AccountsService session preference (overrides GDM default for existing users)
+ssh -t $SSH_HOST "sudo sed -i 's/^Session=.*/Session=cage-mpv/' /var/lib/AccountsService/users/${SSH_USER} 2>/dev/null || echo 'Session=cage-mpv' | sudo tee -a /var/lib/AccountsService/users/${SSH_USER}"
+echo -e "${GREEN}✅ AccountsService session set to cage-mpv${NC}"
+
 echo -e "\n${GREEN}Setup complete!${NC}"
 echo -e "The system will now auto-login to the TV Mode (Cage + MPV) session."
 echo -e "To access GNOME, press Ctrl+Alt+F2 for a TTY, or log out and select 'GNOME' at the login screen."
