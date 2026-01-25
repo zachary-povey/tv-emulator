@@ -1,7 +1,8 @@
-- [ ] loop playlist
+- [x] loop playlist
 - [ ] mouse
-  - unclutter: https://wiki.archlinux.org/title/Unclutter
-- [ ] no background flash
+  - lua script?
+  - disable completely?
+- [x] no background flash
 - [ ] another crack at the hardware buttons
 - [ ] add bluey series 2
 - [ ] add jungle book lion king etc
