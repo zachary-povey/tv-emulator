@@ -1,10 +1,7 @@
-# 1. Interface 02 (Keyboard): Force as keyboard, ensure no mouse ghosting.
+# 1. Interface 02 (Main Keyboard): Force as keyboard
 SUBSYSTEM=="input", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="1025", ATTRS{bInterfaceNumber}=="02", ENV{ID_INPUT_KEYBOARD}="1", ENV{ID_INPUT_MOUSE}="0"
 
-# 2. Interface 03 (Mouse Node): If it claims to be a mouse, IGNORE it.
-# This targets the specific 'event' node that handles the cursor.
-SUBSYSTEM=="input", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="1025", ATTRS{bInterfaceNumber}=="03", ENV{ID_INPUT_MOUSE}=="1", ENV{LIBINPUT_IGNORE_DEVICE}="1"
-
-# 3. Interface 03 (Key Node): If it is NOT a mouse (the volume keys), treat as Keyboard.
-# This ensures the volume buttons on this interface are picked up.
-SUBSYSTEM=="input", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="1025", ATTRS{bInterfaceNumber}=="03", ENV{ID_INPUT_MOUSE}!="1", ENV{ID_INPUT_KEYBOARD}="1"
+# 2. Interface 03 (The Composite Part):
+# This interface spawns two nodes: a Mouse node and a Volume node.
+# We match ONLY the node that has the "MOUSE" tag and wipe its identity.
+SUBSYSTEM=="input", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="1025", ATTRS{bInterfaceNumber}=="03", ENV{ID_INPUT_MOUSE}=="1", ENV{ID_INPUT}=""
