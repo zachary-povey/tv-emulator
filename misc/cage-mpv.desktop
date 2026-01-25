@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=TV Mode (Cage + MPV)
 Comment=Kiosk session running MPV in Cage compositor
-Exec=cage -- /usr/local/bin/cage-mpv-start.sh
+Exec=cage /usr/local/bin/cage-mpv-start.sh
 Type=Application
 DesktopNames=Cage
