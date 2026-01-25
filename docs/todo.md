@@ -1,7 +1,8 @@
 - [ ] loop playlist
 - [ ] mouse
+  - unclutter: https://wiki.archlinux.org/title/Unclutter
 - [ ] no background flash
 - [ ] another crack at the hardware buttons
 - [ ] add bluey series 2
 - [ ] add jungle book lion king etc
-- [ ] miz sesame street with other shows (number blocks?)
+- [ ] mix sesame street with other shows (number blocks?)
