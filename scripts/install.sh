@@ -18,3 +18,14 @@
 
 # install nordvpn and enable lan discovery
 # nordvpn set lan-discovery on
+
+# install hide-cursor gnome extension:
+# https://extensions.gnome.org/extension/6727/hide-cursor/
+
+# make cursor small:
+# gsettings set org.gnome.desktop.interface cursor-size 12
+
+# set background to pure black:
+# gsettings set org.gnome.desktop.background picture-options 'none'
+# gsettings set org.gnome.desktop.background primary-color '#000000'
+
