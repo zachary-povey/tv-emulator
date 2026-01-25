@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=MPV Autostart
-Exec=mpv --idle --force-window --fs --geometry=100%x100% --focus-on-open          
+Exec=mpv --idle --force-window --fs --focus-on-open          
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
