@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
 Name=MPV Autostart
-Exec=mpv --idle --force-window --fs --focus-on-open          
+Exec=sh -c "sleep 5 && mpv --idle --force-window --fs --focus-on-open --loop-playlist"
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true

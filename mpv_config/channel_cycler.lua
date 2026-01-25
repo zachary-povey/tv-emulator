@@ -209,7 +209,6 @@ end)
 -- Initialize
 load_history()
 scan_playlists()
-mp.set_property("loop-playlist", "inf") -- Ensure playlist restarts at end
 
 -- Bindings
 mp.add_key_binding(nil, "channel-next", function() cycle_channel(1) end)
