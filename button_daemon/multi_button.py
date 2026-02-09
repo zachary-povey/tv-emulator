@@ -12,7 +12,6 @@ Edit multi_button_config.py to customize keys and timings.
 """
 
 import os
-import sys
 import time
 
 import evdev
@@ -58,9 +57,10 @@ def main():
     print("Panasonic Multi-Button Daemon", flush=True)
 
     dev_path = find_tablet_button_device()
-    if not dev_path:
-        print("ERROR: Device not found!", flush=True)
-        sys.exit(1)
+    while not dev_path:
+        print("Device not found, retrying in 1s...", flush=True)
+        time.sleep(1)
+        dev_path = find_tablet_button_device()
 
     dev = evdev.InputDevice(dev_path)
     cap = {
@@ -122,7 +122,7 @@ def main():
                     send_key(ui, LONG_PRESS_KEY)
                 else:
                     print(
-                        f"Extra long ({duration:.2f}s) -> {ecodes.KEY[EXTRA_LONG_KEY]}",
+                        f"Extra long ({duration:.2f}s) -> shutdown",
                         flush=True,
                     )
                     subprocess.run(["shutdown", "-h", "now"])

@@ -1,6 +1,7 @@
 [Unit]
 Description=Panasonic Multi-Button Daemon
 After=multi-user.target
+Before=display-manager.service
 
 [Service]
 Type=simple
