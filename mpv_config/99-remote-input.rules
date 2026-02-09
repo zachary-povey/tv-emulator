@@ -5,3 +5,6 @@ SUBSYSTEM=="input", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="1025", ATTRS{bIn
 # This interface spawns two nodes: a Mouse node and a Volume node.
 # We match ONLY the node that has the "MOUSE" tag and wipe its identity.
 SUBSYSTEM=="input", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="1025", ATTRS{bInterfaceNumber}=="03", ENV{ID_INPUT_MOUSE}=="1", ENV{ID_INPUT}=""
+
+# 3. Panasonic Tablet Button: Hide from libinput (handled by multi_button daemon)
+SUBSYSTEM=="input", ATTRS{name}=="Panasonic Tablet Button", ENV{LIBINPUT_IGNORE_DEVICE}="1"

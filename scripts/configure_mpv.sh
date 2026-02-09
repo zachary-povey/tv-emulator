@@ -33,4 +33,4 @@ ssh -t $SSH_HOST "sudo mv /tmp/99-remote-input.rules /etc/udev/rules.d/99-remote
 
 # Unbind volume keys, allowing mpv to pick them up and keep volume control there
 scp "${mpv_config_dir}/90-remote.hwdb" "${SSH_HOST}:/tmp/90-remote.hwdb"
-ssh -t $SSH_HOST "sudo mv /tmp/90-remote.hwdb /etc/udev/hwdb.d/90-remote.hwdb && sudo systemd-hwdb update && sudo udevadm trigger"
+ssh -t $SSH_HOST "sudo mv /tmp/90-remote.hwdb /etc/udev/hwdb.d/90-remote.hwdb && sudo systemd-hwdb update &&  sudo udevadm control --reload-rules && sudo udevadm trigger"
