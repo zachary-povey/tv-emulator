@@ -77,6 +77,19 @@ def main():
 
     dev = evdev.InputDevice(dev_path)
 
+    # Nudge cursor to trigger mpv's autohide (creating UInput shows cursor).
+    # Needs BTN_LEFT for libinput to recognize it as a pointer.
+    mouse = UInput(
+        {ecodes.EV_REL: [ecodes.REL_X, ecodes.REL_Y], ecodes.EV_KEY: [ecodes.BTN_LEFT]},
+        name="Panasonic-Cursor-Nudge",
+    )
+    time.sleep(2)
+    mouse.write(ecodes.EV_REL, ecodes.REL_X, 1)
+    mouse.write(ecodes.EV_REL, ecodes.REL_Y, 1)
+    mouse.syn()
+    time.sleep(0.5)
+    print("Cursor nudged to trigger autohide", flush=True)
+
     print(
         f"Short press (<{SHORT_PRESS_TIME}s): {ecodes.KEY[SHORT_PRESS_KEY]}", flush=True
     )
@@ -137,6 +150,7 @@ def main():
     finally:
         dev.ungrab()
         ui.close()
+        mouse.close()
 
 
 if __name__ == "__main__":
