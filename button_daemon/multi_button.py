@@ -65,7 +65,6 @@ def main():
             MEDIUM_PRESS_KEY,
             LONG_PRESS_KEY,
         ],
-        ecodes.EV_REL: [ecodes.REL_X, ecodes.REL_Y],
     }
     ui = UInput(cap, name="Panasonic Multi-Button")
     print("UInput device created", flush=True)
@@ -77,14 +76,6 @@ def main():
         dev_path = find_tablet_button_device()
 
     dev = evdev.InputDevice(dev_path)
-
-    # Nudge the cursor to trigger mpv's cursor auto-hide.
-    # Repeat a few times with delays in case mpv isn't ready yet.
-    for i in range(5):
-        time.sleep(2)
-        ui.write(ecodes.EV_REL, ecodes.REL_X, 1)
-        ui.write(ecodes.EV_REL, ecodes.REL_Y, 1)
-        ui.syn()
 
     print(
         f"Short press (<{SHORT_PRESS_TIME}s): {ecodes.KEY[SHORT_PRESS_KEY]}", flush=True
