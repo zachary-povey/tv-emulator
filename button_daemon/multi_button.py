@@ -56,13 +56,9 @@ def send_key(ui, key):
 def main():
     print("Panasonic Multi-Button Daemon", flush=True)
 
-    dev_path = find_tablet_button_device()
-    while not dev_path:
-        print("Device not found, retrying in 1s...", flush=True)
-        time.sleep(1)
-        dev_path = find_tablet_button_device()
-
-    dev = evdev.InputDevice(dev_path)
+    # Create UInput immediately so it's registered before the GUI starts.
+    # The hardware device may take 20-30s to appear, but creating UInput
+    # after Cage is running triggers a hotplug event that shows the cursor.
     cap = {
         ecodes.EV_KEY: [
             SHORT_PRESS_KEY,
@@ -71,6 +67,15 @@ def main():
         ]
     }
     ui = UInput(cap, name="Panasonic Multi-Button")
+    print("UInput device created", flush=True)
+
+    dev_path = find_tablet_button_device()
+    while not dev_path:
+        print("Device not found, retrying in 1s...", flush=True)
+        time.sleep(1)
+        dev_path = find_tablet_button_device()
+
+    dev = evdev.InputDevice(dev_path)
 
     print(
         f"Short press (<{SHORT_PRESS_TIME}s): {ecodes.KEY[SHORT_PRESS_KEY]}", flush=True
