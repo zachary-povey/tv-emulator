@@ -78,10 +78,13 @@ def main():
 
     dev = evdev.InputDevice(dev_path)
 
-    # Nudge the cursor to trigger mpv's cursor auto-hide
-    ui.write(ecodes.EV_REL, ecodes.REL_X, 1)
-    ui.write(ecodes.EV_REL, ecodes.REL_Y, 1)
-    ui.syn()
+    # Nudge the cursor to trigger mpv's cursor auto-hide.
+    # Repeat a few times with delays in case mpv isn't ready yet.
+    for i in range(5):
+        time.sleep(2)
+        ui.write(ecodes.EV_REL, ecodes.REL_X, 1)
+        ui.write(ecodes.EV_REL, ecodes.REL_Y, 1)
+        ui.syn()
 
     print(
         f"Short press (<{SHORT_PRESS_TIME}s): {ecodes.KEY[SHORT_PRESS_KEY]}", flush=True
