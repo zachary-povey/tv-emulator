@@ -84,10 +84,11 @@ def main():
         name="Panasonic-Cursor-Nudge",
     )
     time.sleep(2)
-    mouse.write(ecodes.EV_REL, ecodes.REL_X, 1)
-    mouse.write(ecodes.EV_REL, ecodes.REL_Y, 1)
-    mouse.syn()
-    time.sleep(0.5)
+    for _ in range(10):
+        mouse.write(ecodes.EV_REL, ecodes.REL_X, 1)
+        mouse.write(ecodes.EV_REL, ecodes.REL_Y, 1)
+        mouse.syn()
+        time.sleep(0.1)
     print("Cursor nudged to trigger autohide", flush=True)
 
     print(
