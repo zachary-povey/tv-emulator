@@ -8,3 +8,6 @@ SUBSYSTEM=="input", ATTRS{idVendor}=="1915", ATTRS{idProduct}=="1025", ATTRS{bIn
 
 # 3. Panasonic Tablet Button: Hide from libinput (handled by multi_button daemon)
 SUBSYSTEM=="input", ATTRS{name}=="Panasonic Tablet Button", ENV{LIBINPUT_IGNORE_DEVICE}="1"
+
+# 4. Multi-Button daemon UInput: Hide from libinput (virtual device, not a pointer)
+SUBSYSTEM=="input", ATTRS{name}=="Panasonic Multi-Button", ENV{LIBINPUT_IGNORE_DEVICE}="1"
