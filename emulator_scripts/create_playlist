@@ -52,6 +52,40 @@ def collect_video_files(root: Path) -> list[Path]:
     return video_paths
 
 
+def folder_round_robin(video_paths: list[Path]) -> list[Path]:
+    """
+    Reorder *video_paths* by grouping files by their parent folder and then
+    interleaving the groups in round-robin fashion.
+
+    Groups are visited in sorted order of their parent folder; within each
+    group files keep their sorted order. When a group is exhausted it is
+    skipped and the remaining groups continue to round-robin until every file
+    has been placed.
+
+    Args:
+        video_paths: Video file paths, assumed already sorted.
+
+    Returns:
+        The video paths reordered in round-robin order.
+    """
+    groups: dict[Path, list[Path]] = {}
+    for video in video_paths:
+        groups.setdefault(video.parent, []).append(video)
+
+    ordered_groups = [groups[parent] for parent in sorted(groups)]
+
+    result: list[Path] = []
+    index = 0
+    while ordered_groups:
+        index %= len(ordered_groups)
+        result.append(ordered_groups[index].pop(0))
+        if not ordered_groups[index]:
+            del ordered_groups[index]
+        else:
+            index += 1
+    return result
+
+
 def write_m3u_playlist(video_paths: list[Path], playlist_path: Path) -> None:
     """Write an M3U playlist (UTF‑8) with the supplied video file paths."""
     with playlist_path.open("w", encoding="utf-8") as f:
@@ -67,7 +101,11 @@ def parse_args() -> argparse.Namespace:
         description="Recursively generate an M3U playlist of video files."
     )
     parser.add_argument(
-        "start_dir", type=Path, help="Directory to start the recursive search."
+        "start_dir",
+        nargs="?",
+        type=Path,
+        default=Path.cwd(),
+        help="Directory to start the recursive search. Defaults to the current directory.",
     )
     parser.add_argument(
         "output",
@@ -75,6 +113,16 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         help=(
             "Output .m3u file. " "If omitted, '<start_dir>/playlist.m3u' will be used."
+        ),
+    )
+    parser.add_argument(
+        "--mode",
+        choices=["file-order", "folder-round-robin"],
+        default="file-order",
+        help=(
+            "Playlist ordering mode. 'file-order' (default) lists files in "
+            "sorted order. 'folder-round-robin' interleaves files from each "
+            "parent folder in round-robin order."
         ),
     )
     return parser.parse_args()
@@ -93,6 +141,10 @@ def main() -> None:
 
     if not video_files:
         sys.exit("No video files found – nothing to write.")
+
+    if args.mode == "folder-round-robin":
+        video_files = folder_round_robin(video_files)
+
     write_m3u_playlist(video_files, playlist_path)
 
 
