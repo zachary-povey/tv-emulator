@@ -1,0 +1,8 @@
+[Unit]
+Description=TV Emulator daily usage killswitch (one tick)
+# Disarm entirely on Admin boots (GRUB "Admin" entry appends tv_admin=1).
+ConditionKernelCommandLine=!tv_admin
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/tv-killswitch.sh

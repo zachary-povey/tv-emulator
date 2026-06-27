@@ -1,0 +1,15 @@
+[Unit]
+Description=TV Emulator daily usage killswitch (every minute)
+# Disarm entirely on Admin boots (GRUB "Admin" entry appends tv_admin=1).
+ConditionKernelCommandLine=!tv_admin
+
+[Timer]
+# First tick shortly after boot so a same-day over-budget device powers off
+# again promptly, then once a minute thereafter.
+OnBootSec=20s
+OnUnitActiveSec=60s
+AccuracySec=5s
+Unit=tv-killswitch.service
+
+[Install]
+WantedBy=timers.target

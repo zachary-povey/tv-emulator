@@ -29,3 +29,8 @@
 # gsettings set org.gnome.desktop.background picture-options 'none'
 # gsettings set org.gnome.desktop.background primary-color '#000000'
 
+# install daily usage killswitch + hidden admin boot:
+# ./install_killswitch.sh
+#   (daily limit in /etc/tv-emulator/limits.conf; hold SHIFT/ESC at boot for the
+#    "Admin (GNOME desktop)" GRUB entry which disarms the killswitch)
+
