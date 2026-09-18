@@ -18,7 +18,7 @@ CONFIG_FILE=/etc/tv-emulator/limits.conf
 STATE_DIR=/var/lib/tv-emulator
 TICK_SECONDS=60
 
-DAILY_LIMIT_MINUTES=60
+DAILY_LIMIT_MINUTES=30
 if [ -r "$CONFIG_FILE" ]; then
     # shellcheck source=/dev/null
     . "$CONFIG_FILE"
