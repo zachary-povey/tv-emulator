@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% set active = 'channels' %}
+{% block title %}Channels{% endblock %}
+{% block content %}
+
+<p class="muted">
+  Channels are listed in the order the button cycles through them, which is
+  alphabetical by folder name.
+</p>
+
+{% for channel in channels %}
+<section class="card">
+  <h2>{{ channel.name }}</h2>
+
+  {% if channel.has_playlist %}
+    <p class="muted">
+      {{ channel.video_count }} video{{ "" if channel.video_count == 1 else "s" }}
+      {% if channel.missing_count %}
+        &middot; <strong class="bad">{{ channel.missing_count }} missing from disk</strong>
+      {% endif %}
+    </p>
+  {% else %}
+    <p class="bad">
+      No playlist yet &mdash; this channel will not appear on the TV until one is built.
+    </p>
+  {% endif %}
+
+  <form method="post" action="/channels/{{ channel.name }}/volume" class="inline">
+    <label>
+      Volume
+      <input type="number" name="volume" min="0" max="180" inputmode="numeric"
+             value="{{ channel.volume if channel.volume is not none else '' }}"
+             placeholder="default">
+    </label>
+    <button>Save</button>
+  </form>
+
+  <form method="post" action="/channels/{{ channel.name }}/rebuild" class="inline">
+    <label>
+      Order
+      <select name="mode">
+        <option value="file-order">By name</option>
+        <option value="folder-round-robin">Mix folders</option>
+      </select>
+    </label>
+    <button>Rebuild playlist</button>
+  </form>
+</section>
+{% else %}
+<section class="card">
+  <p>No channels found.</p>
+</section>
+{% endfor %}
+
+<section class="card">
+  <h3>About rebuilding</h3>
+  <p class="muted">
+    Rebuilding scans the channel folder for videos and writes a new playlist.
+    Use it after adding or removing files. &ldquo;Mix folders&rdquo; interleaves
+    videos from each sub-folder in turn instead of playing one folder through.
+    Rebuilding can reset where that channel resumes from.
+  </p>
+</section>
+
+{% endblock %}

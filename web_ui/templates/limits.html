@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% set active = 'limits' %}
+{% block title %}Time limit{% endblock %}
+{% block content %}
+
+<section class="card">
+  <h2>Today</h2>
+  <p class="big {% if usage.over_budget %}bad{% endif %}">
+    {{ usage.remaining_minutes }} min left
+  </p>
+  <p class="muted">{{ usage.used_minutes }} of {{ usage.limit_minutes }} minutes used.</p>
+</section>
+
+<section class="card">
+  <h2>Add time for today only</h2>
+  <p class="muted">
+    Gives back minutes for today without changing the daily allowance.
+    Tomorrow returns to {{ usage.limit_minutes }} minutes.
+  </p>
+  <form method="post" action="/limits/credit" class="inline">
+    <label>
+      Minutes
+      <input type="number" name="minutes" min="1" max="{{ max_credit }}"
+             inputmode="numeric" value="15" required>
+    </label>
+    <button>Add time</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Daily allowance</h2>
+  <p class="muted">
+    Applies from today onwards, every day, until changed again.
+    Between {{ min_limit }} and {{ max_limit }} minutes.
+  </p>
+  <form method="post" action="/limits" class="inline">
+    <label>
+      Minutes per day
+      <input type="number" name="minutes" min="{{ min_limit }}" max="{{ max_limit }}"
+             inputmode="numeric" value="{{ usage.limit_minutes }}" required>
+    </label>
+    <button>Save</button>
+  </form>
+</section>
+
+<section class="card">
+  <h3>If the TV keeps switching itself off</h3>
+  <p class="muted">
+    Once the allowance is spent the TV powers off within a minute of starting up.
+    Add time here first, then turn it back on.
+  </p>
+</section>
+
+{% endblock %}

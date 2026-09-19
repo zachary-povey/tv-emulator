@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}TV{% endblock %} &middot; TV Emulator</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header>
+  <h1>TV Emulator</h1>
+  <nav>
+    <a href="/" {% if active == 'status' %}class="on"{% endif %}>Status</a>
+    <a href="/channels" {% if active == 'channels' %}class="on"{% endif %}>Channels</a>
+    <a href="/limits" {% if active == 'limits' %}class="on"{% endif %}>Time limit</a>
+  </nav>
+</header>
+
+<main>
+{% if message %}<p class="flash ok">{{ message }}</p>{% endif %}
+{% if error %}<p class="flash bad">{{ error }}</p>{% endif %}
+
+{% block content %}{% endblock %}
+</main>
+
+<footer>
+  {% if player.running %}
+    <span class="dot on"></span> Player running
+  {% else %}
+    <span class="dot off"></span> Player not running
+  {% endif %}
+  &middot; {{ usage.used_minutes }}/{{ usage.limit_minutes }} min used today
+</footer>
+</body>
+</html>

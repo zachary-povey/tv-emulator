@@ -1,0 +1,4 @@
+# Allow the web UI to power the tablet off and restart it, and nothing else.
+# polkit refuses an unprivileged poweroff on this device (CanPowerOff returns
+# "challenge"), so the service shells out to shutdown via this rule.
+tv-emulator ALL=(root) NOPASSWD: /sbin/shutdown -h now, /sbin/shutdown -r now

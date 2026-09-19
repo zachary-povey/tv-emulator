@@ -1,0 +1,21 @@
+[Unit]
+Description=TV Emulator management web UI
+After=network-online.target
+Wants=network-online.target
+# Deliberately NOT conditioned on tv_admin: the UI must stay reachable on Admin
+# boots. Once the daily allowance is spent the kiosk powers off within a minute
+# of starting, so raising the limit has to be possible from the Admin desktop.
+# This is a system unit under multi-user.target, which is reached on both boot
+# paths (the kiosk/Admin fork happens later, in cage-mpv-start.sh).
+
+[Service]
+Type=simple
+User=tv-emulator
+Group=tv-emulator
+WorkingDirectory=/home/tv-emulator/tv-web/app
+ExecStart=/home/tv-emulator/tv-web/venv/bin/uvicorn web_ui.app:app --host 0.0.0.0 --port 8080
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

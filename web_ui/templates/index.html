@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% set active = 'status' %}
+{% block title %}Status{% endblock %}
+{% block content %}
+
+<section class="card">
+  <h2>Now playing</h2>
+  {% if player.running %}
+    <dl>
+      <dt>Channel</dt><dd>{{ player.channel or "unknown" }}</dd>
+      <dt>Video</dt><dd>{{ player.media_title or "nothing loaded" }}</dd>
+      {% if player.playlist_count %}
+        <dt>Position</dt>
+        <dd>{{ (player.playlist_pos or 0) + 1 }} of {{ player.playlist_count }}</dd>
+      {% endif %}
+      <dt>Volume</dt>
+      <dd>
+        {{ player.volume | round | int if player.volume is not none else "?" }}
+        {% if player.muted %}<strong>(muted)</strong>{% endif %}
+      </dd>
+    </dl>
+  {% else %}
+    <p class="muted">
+      The TV is not playing at the moment. It is either switched off, or booted
+      into the admin desktop. Channel and volume controls need the player,
+      but the time limit can still be changed.
+    </p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Controls</h2>
+  {% if player.running %}
+  <div class="row">
+    <form method="post" action="/device/channel/prev"><button>&larr; Previous</button></form>
+    <form method="post" action="/device/channel/next"><button>Next &rarr;</button></form>
+  </div>
+  <div class="row">
+    <form method="post" action="/device/pause">
+      <button>{% if player.paused %}Resume{% else %}Pause{% endif %}</button>
+    </form>
+    <form method="post" action="/device/mute">
+      <button>{% if player.muted %}Unmute{% else %}Mute{% endif %}</button>
+    </form>
+  </div>
+  {% else %}
+    <p class="muted">Unavailable while the player is not running.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>Time left today</h2>
+  <p class="big {% if usage.over_budget %}bad{% endif %}">
+    {{ usage.remaining_minutes }} min
+  </p>
+  <p class="muted">
+    {{ usage.used_minutes }} of {{ usage.limit_minutes }} minutes used.
+    {% if usage.over_budget %}
+      The allowance is spent, so the TV switches itself off within a minute of
+      being turned on.
+    {% endif %}
+  </p>
+  <p><a class="button" href="/limits">Change the limit or add time</a></p>
+</section>
+
+<section class="card danger">
+  <h2>Power</h2>
+  <div class="row">
+    <form method="post" action="/device/shutdown"
+          onsubmit="return confirm('Switch the TV off now?')">
+      <button class="warn">Switch off</button>
+    </form>
+    <form method="post" action="/device/reboot"
+          onsubmit="return confirm('Restart the TV now?')">
+      <button class="warn">Restart</button>
+    </form>
+  </div>
+  <p class="muted">
+    Restarting from the admin desktop brings the TV back in normal
+    (child) mode.
+  </p>
+</section>
+
+{% endblock %}
