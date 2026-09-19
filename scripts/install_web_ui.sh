@@ -117,6 +117,21 @@ ssh -t $SSH_HOST "sudo mv /tmp/cage-mpv-start.sh /usr/local/bin/cage-mpv-start.s
   sudo chmod +x /usr/local/bin/cage-mpv-start.sh"
 echo -e "${GREEN}✅ cage-mpv-start.sh updated (takes effect on the next kiosk boot)${NC}"
 
+# --- Firewall -------------------------------------------------------------
+# ufw is active on the tablet and drops inbound connections by default, so the
+# UI's port has to be opened explicitly or the service is unreachable from the
+# LAN even though it is listening on 0.0.0.0. Scoped to private ranges rather
+# than opened globally.
+if ssh $SSH_HOST "systemctl is-active --quiet ufw"; then
+  echo -e "${YELLOW}Opening port ${PORT} in ufw for local networks...${NC}"
+  ssh -t $SSH_HOST "sudo ufw allow from 192.168.0.0/16 to any port ${PORT} proto tcp comment 'TV Emulator web UI' && \
+    sudo ufw allow from 10.0.0.0/8 to any port ${PORT} proto tcp comment 'TV Emulator web UI' && \
+    sudo ufw allow from 172.16.0.0/12 to any port ${PORT} proto tcp comment 'TV Emulator web UI'"
+  echo -e "${GREEN}✅ ufw allows ${PORT}/tcp from private networks${NC}"
+else
+  echo -e "${GREEN}✅ ufw not active - no firewall rule needed${NC}"
+fi
+
 # --- systemd service ------------------------------------------------------
 scp -q "${web_ui_dir}/tv-web-ui.service" "${SSH_HOST}:/tmp/tv-web-ui.service"
 ssh -t $SSH_HOST "sudo mv /tmp/tv-web-ui.service /etc/systemd/system/tv-web-ui.service && \
@@ -133,6 +148,19 @@ if ssh $SSH_HOST "curl -fsS -o /dev/null http://127.0.0.1:${PORT}/"; then
 else
   echo -e "${RED}👎 The UI did not respond. Recent logs:${NC}"
   ssh $SSH_HOST "journalctl -u tv-web-ui.service -n 30 --no-pager" || true
+  exit 1
+fi
+
+# Reaching it from this machine is the check that matters: a service can answer
+# on localhost while the firewall still drops everything from the LAN.
+device_ip=$(ssh $SSH_HOST "hostname -I | awk '{print \$1}'")
+echo -e "${YELLOW}Checking the UI is reachable from this machine (${device_ip})...${NC}"
+if curl -fsS -m 10 -o /dev/null "http://${device_ip}:${PORT}/"; then
+  echo -e "${GREEN}✅ Reachable across the network${NC}"
+else
+  echo -e "${RED}👎 Listening on the device but unreachable from here.${NC}"
+  echo -e "${YELLOW}   Usually a firewall. Check on the device with: sudo ufw status${NC}"
+  echo -e "${YELLOW}   NordVPN can also block LAN traffic: nordvpn set lan-discovery enable${NC}"
   exit 1
 fi
 
