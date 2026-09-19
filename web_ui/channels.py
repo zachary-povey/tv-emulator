@@ -30,6 +30,7 @@ class Channel:
         video_count: Number of entries in the playlist.
         volume: Configured per-channel volume, if set.
         missing_count: Playlist entries whose files no longer exist.
+        settings_problem: Why the settings file was ignored, if it was.
     """
 
     name: str
@@ -38,6 +39,7 @@ class Channel:
     video_count: int
     volume: int | None
     missing_count: int
+    settings_problem: str | None = None
 
     @property
     def playlist_path(self) -> Path:
@@ -77,16 +79,33 @@ def resolve(name: str) -> Path:
     return path
 
 
-def read_settings(path: Path) -> dict:
-    """Return a channel's settings, or an empty dict when absent or unreadable."""
+def read_settings(path: Path) -> tuple[dict, str | None]:
+    """Return a channel's settings and a problem description, if any.
+
+    MPV's own parser is strict JSON, so a file it cannot read is a real
+    misconfiguration: the channel silently plays at the default volume. The
+    problem is reported rather than swallowed so the UI can show it.
+
+    Args:
+        path: The channel directory.
+
+    Returns:
+        A tuple of the settings dict (empty when absent or unusable) and a
+        human-readable problem, or None when the file is absent or valid.
+    """
     settings_path = path / config.SETTINGS_FILENAME
     if not settings_path.is_file():
-        return {}
+        return {}, None
     try:
         data = json.loads(settings_path.read_text())
-    except (json.JSONDecodeError, OSError):
-        return {}
-    return data if isinstance(data, dict) else {}
+    except json.JSONDecodeError as exc:
+        return {}, f"settings.json is not valid JSON ({exc.msg}); MPV ignores it"
+    except OSError as exc:
+        return {}, f"settings.json could not be read ({exc.strerror})"
+
+    if not isinstance(data, dict):
+        return {}, "settings.json is not an object; MPV ignores it"
+    return data, None
 
 
 def playlist_entries(path: Path) -> list[str]:
@@ -136,7 +155,7 @@ def set_volume(name: str, volume: int | None) -> None:
     if volume is not None and not 0 <= volume <= 180:
         raise ChannelError(f"Volume must be between 0 and 180 (got {volume}).")
 
-    settings = read_settings(path)
+    settings, _ = read_settings(path)
     if volume is None:
         settings.pop("volume", None)
     else:
@@ -182,8 +201,11 @@ def rebuild_playlist(name: str, mode: str = "file-order") -> int:
 def _describe(path: Path) -> Channel:
     """Build a Channel record by inspecting a channel directory."""
     entries = playlist_entries(path)
-    settings = read_settings(path)
+    settings, problem = read_settings(path)
     volume = settings.get("volume")
+
+    if "volume" in settings and not isinstance(volume, (int, float)):
+        problem = problem or "settings.json has a non-numeric volume; MPV ignores it"
 
     missing = sum(1 for entry in entries if not Path(entry).is_file())
 
@@ -194,4 +216,5 @@ def _describe(path: Path) -> Channel:
         video_count=len(entries),
         volume=int(volume) if isinstance(volume, (int, float)) else None,
         missing_count=missing,
+        settings_problem=problem,
     )

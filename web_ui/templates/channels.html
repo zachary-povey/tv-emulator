@@ -25,6 +25,12 @@
     </p>
   {% endif %}
 
+  {% if channel.settings_problem %}
+    <p class="bad">
+      {{ channel.settings_problem }}. Saving a volume below rewrites the file correctly.
+    </p>
+  {% endif %}
+
   <form method="post" action="/channels/{{ channel.name }}/volume" class="inline">
     <label>
       Volume

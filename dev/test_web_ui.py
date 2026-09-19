@@ -78,6 +78,36 @@ check("bad json -> no volume", c.volume, None)
 check("counts entries", c.video_count, 1)
 check("counts missing", c.missing_count, 1)
 
+print("== channels: malformed settings are reported, not swallowed ==")
+# A real case from the device: valid-looking but not strict JSON, which MPV's
+# own parser also rejects, so the channel silently played at default volume.
+cases = {
+    "unquoted": ('{volume: 140}\n', "not valid JSON"),
+    "notobj":   ('[1,2,3]\n', "not an object"),
+    "badtype":  ('{"volume": "loud"}\n', "non-numeric volume"),
+    "trunc":    ('{"volume":\n', "not valid JSON"),
+    "good":     ('{"volume": 90}\n', None),
+}
+for cname, (body, expect) in cases.items():
+    d = root/"Channels"/cname
+    d.mkdir()
+    (d/"settings.json").write_text(body)
+    (d/"playlist.m3u").write_text("#EXTM3U\n")
+    loaded = channels.load(cname)
+    if expect is None:
+        check(f"{cname}: volume read", loaded.volume, 90)
+        check(f"{cname}: no problem", loaded.settings_problem, None)
+    else:
+        check(f"{cname}: volume ignored", loaded.volume, None)
+        check(f"{cname}: problem reported", expect in (loaded.settings_problem or ""), True)
+
+print("== channels: saving repairs a malformed file ==")
+channels.set_volume("unquoted", 140)
+repaired = channels.load("unquoted")
+check("repaired volume", repaired.volume, 140)
+check("problem cleared", repaired.settings_problem, None)
+check("valid json on disk", json.loads((root/"Channels/unquoted/settings.json").read_text()), {"volume": 140})
+
 print("== channels: rebuild with no videos ==")
 try:
     channels.rebuild_playlist("broken"); check("empty rebuild rejected", False, True)
