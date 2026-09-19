@@ -1,4 +1,5 @@
 - [x] loop playlist
+- [x] web UI for managing channels and the time limit
 - [ ] mouse
   - lua script?
   - disable completely?

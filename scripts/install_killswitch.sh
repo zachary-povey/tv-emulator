@@ -42,8 +42,17 @@ ssh -t $SSH_HOST "sudo mkdir -p /etc/tv-emulator && \
     echo 'limits.conf already exists on device - leaving it untouched'; rm -f /tmp/limits.conf; \
   else \
     sudo mv /tmp/limits.conf /etc/tv-emulator/limits.conf; \
-  fi"
+  fi && \
+  sudo chown ${SSH_USER}:${SSH_USER} /etc/tv-emulator/limits.conf"
 echo -e "${GREEN}✅ /etc/tv-emulator/limits.conf in place${NC}"
+
+# --- Usage state directory -------------------------------------------------
+# Owned by the service user so the management web UI can grant extra time by
+# subtracting from today's usage file. tv-killswitch.sh still writes it as root.
+ssh -t $SSH_HOST "sudo mkdir -p /var/lib/tv-emulator && \
+  sudo chown ${SSH_USER}:${SSH_USER} /var/lib/tv-emulator && \
+  sudo chmod 755 /var/lib/tv-emulator"
+echo -e "${GREEN}✅ /var/lib/tv-emulator owned by ${SSH_USER}${NC}"
 
 # --- systemd service + timer ----------------------------------------------
 scp "${killswitch_dir}/tv-killswitch.service" "${SSH_HOST}:/tmp/tv-killswitch.service" >/dev/null

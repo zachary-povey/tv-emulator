@@ -15,5 +15,6 @@ fi
 wpctl set-mute @DEFAULT_AUDIO_SINK@ 0
 wpctl set-volume @DEFAULT_AUDIO_SINK@ 1.0
 
-# Launch mpv
-exec mpv --idle --force-window --fs
+# Launch mpv. --input-ipc-server exposes a JSON IPC socket owned by this user,
+# which the management web UI uses for the channel, pause and mute controls.
+exec mpv --idle --force-window --fs --input-ipc-server=/tmp/mpv-socket

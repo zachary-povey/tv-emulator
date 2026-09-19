@@ -34,6 +34,7 @@ Source lives in this repo; the table shows where each piece lands on the tablet.
 | Disable touchscreen/stylus + set brightness | `disable_screen/` | `scripts/install_disable_touchscreen.sh` | systemd oneshot service |
 | Channel-management helper scripts | `emulator_scripts/` | `scripts/install_emulator_scripts.sh` | `~/Scripts/` (added to PATH) |
 | Daily usage killswitch + hidden admin boot | `killswitch/` | `scripts/install_killswitch.sh` | `/usr/local/bin/tv-killswitch.sh`, systemd timer+service, `/etc/tv-emulator/limits.conf`, GRUB entry in `/etc/grub.d/40_custom` |
+| LAN management web UI | `web_ui/` | `scripts/install_web_ui.sh` | `~/tv-web/{app,venv}`, `tv-web-ui.service`, `/etc/sudoers.d/tv-emulator-web` |
 
 `scripts/install.sh` is an **unfinished** top-level orchestrator — currently just
 a comment list of manual prereq steps (SSH server, brightnessctl, NordVPN LAN
@@ -78,6 +79,38 @@ grub fix). It does not yet run the other scripts in order.
   by the installer and delimited by `### BEGIN/END tv-emulator admin entry` markers
   so re-running replaces rather than duplicates it.
 
+## The web UI
+
+A small FastAPI app (server-rendered Jinja2, no JS build step) so the device can
+be managed from a phone without SSH. Reached at **`http://tv.local:8080`** —
+`avahi-daemon` was already running on the tablet, so the installer only shortens
+the hostname to `tv`. It offers channel management (per-channel volume,
+rebuilding playlists), the daily limit (change the allowance, or grant extra
+minutes for today only), and device controls (next/prev channel, pause, mute,
+shutdown, reboot).
+
+- **Runs unprivileged** as `tv-emulator`. `limits.conf` and `/var/lib/tv-emulator`
+  are owned by that user, so only power actions need root — via a single
+  `sudoers.d` rule whitelisting `/sbin/shutdown -h now` and `-r now`.
+- **No authentication**, by choice: it is a trusted-LAN tool. Anyone on the
+  network can reach it, including the shutdown button.
+- **Starts on both boot profiles.** The unit is deliberately *not* conditioned on
+  `tv_admin` — once the day's allowance is spent the kiosk powers off within a
+  minute of booting, so the limit has to be changeable from the Admin desktop.
+  It works because `multi-user.target` is reached on both paths; the kiosk/Admin
+  fork happens later, in `cage-mpv-start.sh`.
+- **Device controls need MPV's IPC socket**, which is why `cage-mpv-start.sh`
+  passes `--input-ipc-server=/tmp/mpv-socket`. The UI treats an absent socket as
+  normal (the TV is off, or on an Admin boot) and hides those controls.
+- **Granting extra time subtracts from the usage file** rather than raising the
+  limit, so tomorrow is unaffected. This is why `/var/lib/tv-emulator` is owned
+  by `tv-emulator` — note the tradeoff: the kiosk user could in principle rewrite
+  its own usage counter.
+- **Local development without the tablet:** all four device paths come from env
+  vars (`TV_CHANNELS_DIR`, `TV_LIMITS_CONF`, `TV_USAGE_DIR`, `TV_MPV_SOCKET`).
+  `dev/run_local.sh` builds a fixture tree and starts `dev/fake_mpv.py`, which
+  speaks the real JSON-IPC protocol. `dev/test_web_ui.py` covers the edge cases.
+
 ## The physical button (the hard part)
 
 Only the **A1 button** works on this tablet under Linux — the EC firmware won't
@@ -109,6 +142,12 @@ handling so the daemon owns it.
   remap its volume scancodes so MPV picks them up.
 - **C-state CPU bug**: needs `intel_idle.max_cstate=1` in grub or the processor
   has issues (noted in `install.sh`).
+- **mDNS and VPN**: `.local` names do not traverse a VPN tunnel, so `tv.local`
+  can fail while NordVPN is up even though the device is reachable by IP. Test
+  the raw IP first to tell "service down" from "mDNS blocked".
+- **Ubuntu 24.04 is PEP-668 managed**, so the web UI's dependencies live in a
+  venv. `python3 -m venv` needs the `python3-venv` package (it provides
+  `ensurepip`, which the base `python3` omits) — the installer apt-installs it.
 - The MK4 ACPI device ID is `MAT0037`; BIOS V4.00L25 *might* fix button routing
   but requires Windows to flash.
 

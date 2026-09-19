@@ -40,6 +40,8 @@ echo -e "${GREEN}✅ python3-venv present${NC}"
 
 # --- Application code ------------------------------------------------------
 echo -e "${YELLOW}Copying application...${NC}"
+# Strip caches so no stale bytecode is shipped to the device.
+find "${web_ui_dir}" -name '__pycache__' -type d -prune -exec rm -rf {} + 2>/dev/null || true
 ssh $SSH_HOST "rm -rf /tmp/web_ui && mkdir -p /tmp/web_ui"
 scp -q -r "${web_ui_dir}/." "${SSH_HOST}:/tmp/web_ui/"
 ssh $SSH_HOST "mkdir -p ${remote_app} && rm -rf ${remote_app}/web_ui && \

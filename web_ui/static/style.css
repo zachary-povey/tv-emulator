@@ -40,7 +40,7 @@ header {
   padding: 1rem 16px 0;
   position: sticky;
   top: 0;
-  z-index: 5;
+  z-index: 10;
 }
 
 header h1 {
@@ -61,7 +61,7 @@ nav a {
 
 nav a.on { color: var(--text); border-bottom-color: var(--accent); }
 
-main { max-width: 34rem; margin: 0 auto; padding: 1rem 16px; }
+main { max-width: 34rem; margin: 0 auto; padding: 1rem 16px; position: relative; z-index: 1; }
 
 .card {
   background: var(--card);
