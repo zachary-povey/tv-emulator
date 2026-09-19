@@ -27,6 +27,11 @@ management, the daily usage limit, and basic device controls. Reachable at
 - PyPI is reachable from the tablet.
 - MPV exposes **no IPC socket** today → device controls need a startup change.
 - Ports 8080/8000 are free.
+- `multi-user.target` is **active on admin boots**, confirmed on a live
+  `tv_admin=1` boot → a `WantedBy=multi-user.target` unit starts on both
+  profiles (see step 4).
+- Unprivileged poweroff is **not** possible: dbus `CanPowerOff` returns
+  `challenge` (polkit wants interactive auth), so shutdown needs a sudoers rule.
 
 ## Steps
 
@@ -85,10 +90,12 @@ Channel ordering is alphabetical, matching `channel_cycler.lua`'s
 | `POST /device/mute` | Toggle mute via MPV IPC |
 | `POST /device/shutdown` | Shutdown (confirm step in the UI) |
 
-Shutdown/reboot: `systemd-run`/`loginctl` as the user is not reliable here, so
-this is the one action that may still need a narrow `sudoers.d` rule for
-`/sbin/shutdown`. Confirm at implementation time; if a rule is needed it
-whitelists exactly that one command.
+Shutdown: **resolved** — dbus `CanPowerOff` returns `challenge` on this device,
+so polkit blocks an unprivileged poweroff (it would hang rather than work).
+`scripts/install_web_ui.sh` therefore installs
+`/etc/sudoers.d/tv-emulator-web` whitelisting exactly
+`/sbin/shutdown` NOPASSWD for `tv-emulator`, and nothing else. Written with
+`visudo -c` validation so a malformed file can't lock sudo.
 
 ### 4. `web_ui/tv-web-ui.service`
 
@@ -96,7 +103,16 @@ Runs `~/tv-web/venv/bin/uvicorn` as `tv-emulator`, `Restart=always`,
 `WantedBy=multi-user.target`. Binds `0.0.0.0:8080`.
 
 Carries **no** `ConditionKernelCommandLine=!tv_admin` — unlike the killswitch,
-the UI should stay reachable on admin boots.
+the UI **must** stay reachable on admin boots. This is a hard requirement: when
+the daily budget is already spent, the kiosk shuts down within ~1 min of boot,
+so raising the limit has to be possible from the admin profile without fighting
+a shutdown loop.
+
+This works because the admin/kiosk fork happens late, inside
+`cage-mpv-start.sh` (a *session*-level decision), whereas this is a
+*system*-level unit ordered under `multi-user.target` — which is active on both
+boot paths (verified on a live admin boot). No `tv_admin` handling is needed in
+this unit at all.
 
 ### 5. `scripts/install_web_ui.sh`
 
@@ -113,10 +129,31 @@ pattern:
 6. Redeploy `cage-mpv-start.sh` for the IPC socket (step 1).
 7. Print the URL and `systemctl status`.
 
-## Verification
+## Local development before deploying
 
-Cannot be fully tested from here — MPV wasn't running during planning, so the
-IPC path is verified at deploy time. After install:
+All device state is reached through four paths, which are taken from env vars
+(`TV_CHANNELS_DIR`, `TV_LIMITS_CONF`, `TV_USAGE_DIR`, `TV_MPV_SOCKET`) and
+default to the real device locations. Nothing is hardcoded, so the whole UI can
+be developed and exercised on the Mac:
+
+- `dev/make_fixture.py` builds a throwaway tree under the scratchpad: a few
+  channel dirs with `playlist.m3u` + `settings.json`, a `limits.conf`, and a
+  `usage-<today>` file.
+- `dev/fake_mpv.py` listens on a unix socket and speaks the same
+  JSON-lines IPC protocol as MPV (`{"command":[...]}` →
+  `{"data":...,"error":"success"}`), so the real client code path is exercised
+  rather than stubbed out.
+- `dev/run_local.sh` points the env vars at the fixture and starts uvicorn with
+  `--reload`.
+
+This leaves exactly one thing that can only be confirmed on the tablet: whether
+**real** MPV is listening on the socket. Everything else — routing, forms,
+validation, `limits.conf` rewriting, usage math, playlist rebuilds, the phone
+layout — is testable locally.
+
+## Verification on the device
+
+After install:
 
 1. `curl http://tv.local:8080/` from the Mac → mDNS + service both work.
 2. Reboot into the kiosk, confirm video plays (proves step 1 didn't break it)
@@ -126,6 +163,8 @@ IPC path is verified at deploy time. After install:
    still parses it (`journalctl -t tv-killswitch`).
 5. Grant extra minutes → usage file decreases, device stays on.
 6. Check the UI renders sanely on her phone.
+7. Boot **admin** and confirm the UI is still reachable (the escape hatch: the
+   budget can be raised from the admin profile with the killswitch inert).
 
 ## Notes / risks
 
